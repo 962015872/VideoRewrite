@@ -29,12 +29,12 @@
                     <form>
                         <input type="text" class="form-control" v-model="inputField" id="output" placeholder="请输入对话内容">
                         <div class="form-buttons">
-                            <button id="startBtn" v-if="!onReco" @click="start()"  class="btn btn-light d-none d-sm-inline-block">
+                            <span id="startBtn" v-if="!onReco" @click="start"  class="btn btn-light d-none d-sm-inline-block">
                                <el-icon size="18px"><Microphone/></el-icon>
-                            </button>
-                            <button  @click="end()" v-else id="startBtn" class="btn btn-light d-none d-sm-inline-block">
+                            </span>
+                            <span  @click="end()" v-else id="startBtn" class="btn btn-light d-none d-sm-inline-block">
                                 <el-icon size="18px"><Mute/></el-icon>
-                            </button>
+                            </span>
                             <button style="padding: 11px 14px;" class="btn btn-primary" type="submit" id="endBtn">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send">
                                     <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -225,7 +225,7 @@ const add = ({message, type , msg = ''}) => {
     }
 }
 
-const start = () => {
+const start = (e) => {
     child.value.startRecorder()
     onReco.value = child.value.onReco
 }
