@@ -27,16 +27,19 @@
                 </div>
                 <div class="chat-footer">
                     <form>
-                        <input type="text" class="form-control" id="output" placeholder="请输入对话内容">
+                        <input type="text" class="form-control" v-model="inputField" id="output" placeholder="请输入对话内容">
                         <div class="form-buttons">
-                            <button id="startBtn" v-if="!onReco" @click="start()"  class="btn btn-light d-none d-sm-inline-block" data-toggle="tooltip" title="" type="button" data-original-title="Send a voice record">
+                            <button id="startBtn" v-if="!onReco" @click="start()"  class="btn btn-light d-none d-sm-inline-block">
                                <el-icon size="18px"><Microphone/></el-icon>
                             </button>
-                            <button  @click="end()" v-else id="startBtn" class="btn btn-light d-none d-sm-inline-block" data-toggle="tooltip" title="" type="button" data-original-title="Send a voice record">
+                            <button  @click="end()" v-else id="startBtn" class="btn btn-light d-none d-sm-inline-block">
                                 <el-icon size="18px"><Mute/></el-icon>
                             </button>
                             <button style="padding: 11px 14px;" class="btn btn-primary" type="submit" id="endBtn">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
                             </button>
                         </div>
                     </form>
@@ -52,7 +55,7 @@
         </div> -->
         <RealTime ref="child"></RealTime>
         <div class="img" style="display: none;">
-            <img v-if="imageUrl" :src="imageUrl" alt="" style="width: 100%;">
+            <img :src="imageUrl" alt="" style="width: 100%;">
         </div>
         <div class="tab" style="display: none;">
             <table class="tab__table" style="border-collapse:collapse;">
@@ -136,6 +139,7 @@ const dict = ref({
 const child = ref(null)
 const onReco = ref(false)
 const imageUrl = ref('')
+const inputField = ref('')
 onMounted(() => {
     // socket连接
     let userId = uuidv4();
@@ -153,9 +157,9 @@ onMounted(() => {
         e.preventDefault();
 
         var input = $(this).find('input[type=text]');
-        var message = input.val();
+        // var message = input.val();
 
-        message = $.trim(message);
+        var message = $.trim(inputField.value);
         
         if (message) {
             add({message, type: 'outgoing-message'});
@@ -163,56 +167,28 @@ onMounted(() => {
             if(onReco.value) {
                 end()
             }
-            
-            // nextTick(() => {
-                
-            //     // output.value = '';
-            // })
-            // let output = document.getElementById("output")
-            // output.value = ''
-            // console.log(output.value )
             socket.onmessage = function(res) {
                 console.log(res)
                 if(res.data != '成功') {
                     let obj = JSON.parse(res.data)
                     console.log(obj)
-                    // let result
-                    let result = obj.state == null ? '数据库暂无数据' : obj.state
-                    if(obj.objects != null) {
-                        tableData.value = obj.objects[0].slice(0,10)
-                        thead.value = Object.keys(obj.objects[0][0])
-                        result = obj.num ? obj.num : ''
+                    let result = obj.results != '无' ? obj.results : ''
+
+                    if(obj.tabData != '无') {
+                        tableData.value = obj.tabData[0].slice(0,10)
+                        thead.value = Object.keys(obj.tabData[0][0])
                     }
-                    if(obj.jpgPath != null ) {
+                    if(obj.jpgPath != '无') {
                         imageUrl.value = imgUrl + obj.jpgPath
-                        result = obj.state == null ? '' : obj.state
                     } 
-                    if(obj.gdAnswer != null ) {
-                        result = obj.gdAnswer
-                    } 
-                    if(obj.num  && input.val().includes('总长度')) {
-                        result = '总长度为' + obj.num
-                    } 
-                    if(obj.num && input.val().includes('有多少个')) {
-                        console.log(input.val())
-                        result = `全市有${obj.num}个500千伏变电站`
-                    } 
-                    // let msg = `对应标准问题：${obj.question}<br/>
-                    //             所属类别:${obj.cate}<br/>
-                    //             指令:${obj.directive ? obj.directive : '空'}<br/>
-                    //             输入提示:${obj.tips}<br/>
-                    //             结果：${result}<br/>
-                    //             `
-                    let msg = `
-                        ${result}<br/>
-                        `
+                    let msg = `<span>${result}</span>`
                     nextTick(() => {
                         add({msg})
                     })
                 }
             }
             setTimeout(() => {
-                input.val('')
+                inputField.value = '' 
             }, 500)
             tableData.value = []
             thead.value = []
@@ -227,8 +203,8 @@ const add = ({message, type , msg = ''}) => {
     if (chat_body.length > 0) {
         type = type ? type : '';
         message = type ? message : msg;
-        let tab = type ? msg : $('.tab').html();
-        let img = type ? msg : $('.img').html()
+        let tab = tableData.value.length > 0 && !type ? $('.tab').html() : '';
+        let img = imageUrl.value && !type ? $('.img').html() : '';
         $('.layout .content .chat .chat-body .messages').append(`<div class="message-item ` + type + `">
             <div>
                 <div class="message-content">
@@ -245,16 +221,14 @@ const add = ({message, type , msg = ''}) => {
     }
 }
 
-function start() {
+const start = () => {
     child.value.startRecorder()
     onReco.value = child.value.onReco
 }
-function end() {
+const end = () => {
     child.value.endRecorder()
     onReco.value = child.value.onReco
 }
-
-
 </script>
 <style scoped>
 .chat-body::-webkit-scrollbar {
