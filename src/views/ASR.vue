@@ -181,6 +181,10 @@ onMounted(() => {
                     if(obj.jpgPath != '无') {
                         imageUrl.value = imgUrl + obj.jpgPath
                     } 
+                    if ([obj.results, obj.tabData, obj.jpgPath].every(prop => prop === '无')) {  
+                        result = '数据库暂无数据';  
+                    }
+                    console.log(result)
                     let msg = `<span>${result}</span>`
                     nextTick(() => {
                         add({msg})
