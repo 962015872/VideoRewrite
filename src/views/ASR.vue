@@ -27,7 +27,7 @@
                 </div>
                 <div class="chat-footer">
                     <form>
-                        <input type="text" class="form-control" v-model="inputField" id="output" placeholder="请输入对话内容">
+                        <input type="text" class="form-control" id="output" placeholder="请输入对话内容">
                         <div class="form-buttons">
                             <span id="startBtn" v-if="!onReco" @click="start"  class="btn btn-light d-none d-sm-inline-block">
                                <el-icon size="18px"><Microphone/></el-icon>
@@ -139,7 +139,6 @@ const dict = ref({
 const child = ref(null)
 const onReco = ref(false)
 const imageUrl = ref('')
-const inputField = ref('')
 onMounted(() => {
     // socket连接
     let userId = uuidv4();
@@ -157,10 +156,8 @@ onMounted(() => {
         e.preventDefault();
 
         var input = $(this).find('input[type=text]');
-        // var message = input.val();
-
-        var message = $.trim(inputField.value);
-        
+        var message = input.val();
+        message = $.trim(message);
         if (message) {
             add({message, type: 'outgoing-message'});
             sendMessage(message)
@@ -192,7 +189,7 @@ onMounted(() => {
                 }
             }
             setTimeout(() => {
-                inputField.value = '' 
+                input.val('')
             }, 500)
             tableData.value = []
             thead.value = []
