@@ -156,8 +156,15 @@ onMounted(() => {
         e.preventDefault();
 
         var input = $(this).find('input[type=text]');
+<<<<<<< Updated upstream
         var message = input.val();
         message = $.trim(message);
+=======
+        // var message = input.val();
+
+        var message = $.trim(inputField.value);
+        console.log(message)
+>>>>>>> Stashed changes
         if (message) {
             add({message, type: 'outgoing-message'});
             sendMessage(message)
@@ -178,10 +185,6 @@ onMounted(() => {
                     if(obj.jpgPath != '无') {
                         imageUrl.value = imgUrl + obj.jpgPath
                     } 
-                    if ([obj.results, obj.tabData, obj.jpgPath].every(prop => prop === '无')) {  
-                        result = '数据库暂无数据';  
-                    }
-                    console.log(result)
                     let msg = `<span>${result}</span>`
                     nextTick(() => {
                         add({msg})
